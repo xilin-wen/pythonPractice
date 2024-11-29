@@ -1,6 +1,8 @@
+import multiprocessing
+from multiprocessing import Value, Lock
+
 from decoratorFunc.auth import route
 import json
-from multiprocessing import Process, Value
 
 data_hello = {"message": "Hello, world!"}
 data_goodbye = {"message": "Goodbye, world!"}
@@ -15,26 +17,43 @@ def handle_hello(self):
 
 @route('/goodbye')
 def handle_goodbye(self):
-    print("token", self.token)
     self.send_response(200)
     self.send_header('Content-type', 'application/json')
     self.end_headers()
     self.wfile.write(json.dumps(data_goodbye).encode())
 
-# 定义全局变量，使用 Value 来实现多进程共享
-counter = Value('i', 0)  # 'i' 是整数类型
-@route('/count', token_required=False)
-def handle_count(self):
+# 使用 Manager 创建共享的字典
+def countFunc(counter):
     # 每次接收到请求时，增加全局变量
-    with counter.get_lock():  # 使用锁确保线程安全
-        counter.value += 1
+    counter['value'] += 1
 
-    response = {
-        "message": "请求成功",
-        "counter": counter.value
-    }
+@route('/count', method='GET', token_required=False)
+def handle_count(self):
+    processes = []
 
-    self.send_response(200)
-    self.send_header('Content-type', 'application/json')
-    self.end_headers()
-    self.wfile.write(json.dumps(response).encode())
+    with multiprocessing.Manager() as manager:
+        # 使用 Manager 创建一个共享的字典
+        counter = manager.dict()
+        counter['value'] = 0  # 初始化计数值为 0
+
+        for i in range(6):
+            count_process = multiprocessing.Process(target=countFunc, args=(counter,))
+            processes.append(count_process)
+            count_process.start()
+
+        # 等待所有进程完成
+        for p in processes:
+            p.join()
+
+
+        response = {
+            "message": "请求成功",
+            "counter": counter['value']
+        }
+
+        print("counter.value", counter['value'])
+
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps(response).encode())

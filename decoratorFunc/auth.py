@@ -11,13 +11,15 @@ def route(path, method='GET', disposal_mode='normal', token_required=True, role_
     :return: 装饰后的函数
     """
     def decorator(func):
-        print(f"Registering handler for {path} with method {method}")
-        if path not in route_handlers:
-            route_handlers[path] = {}  # 如果路径没有注册过，则初始化为一个空字典
+        # print(f"Registering handler for {path} with method {method}")
+        # if path not in route_handlers:
+        #     route_handlers[path] = {}  # 如果路径没有注册过，则初始化为一个空字典
+        #
+        # route_handlers[path][method] = func  # 将处理函数存储到对应的请求方法下
 
-        route_handlers[path][method] = func  # 将处理函数存储到对应的请求方法下
-        route_handlers[path][disposal_mode] = func  # 将处理函数存储到对应的请求方法下
 
+
+        # route_handlers[path][disposal_mode] = True  # 写入函数是否需要特殊处理，如果需要如何处理
 
         def wrapper(self, *args, **kwargs):
             headers = self.headers
