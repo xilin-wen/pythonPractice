@@ -20,10 +20,15 @@ def handle_goodbye(self):
     self.end_headers()
     self.wfile.write(json.dumps(data_goodbye).encode())
 
+shared_var = multiprocessing.Value('i', 0)
+lock = multiprocessing.Lock()
+
 # 使用 Manager 创建共享的字典
 def countFunc(counter):
     # 每次接收到请求时，增加全局变量
     counter['value'] += 1
+    with lock:
+        shared_var.value += 1
 
 @route('/count', method='GET', token_required=False)
 def handle_count(self):
@@ -43,10 +48,10 @@ def handle_count(self):
         for p in processes:
             p.join()
 
-
         response = {
             "message": "请求成功",
-            "counter": counter['value']
+            "counter": counter['value'],
+            "lock": shared_var.value
         }
 
         print("counter.value", counter['value'])
@@ -55,3 +60,4 @@ def handle_count(self):
         self.send_header('Content-type', 'application/json')
         self.end_headers()
         self.wfile.write(json.dumps(response).encode())
+
