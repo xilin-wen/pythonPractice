@@ -1,8 +1,6 @@
 import multiprocessing
-from multiprocessing import Value, Lock
-
-from decoratorFunc.auth import route
 import json
+from decoratorFunc.auth import route
 
 data_hello = {"message": "Hello, world!"}
 data_goodbye = {"message": "Goodbye, world!"}

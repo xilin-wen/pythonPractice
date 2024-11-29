@@ -1,7 +1,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from multiprocessing.spawn import freeze_support
-
+from server import func
 from decoratorFunc.analyzeRoute import route_dispatcher_decorator
+
 
 data = {'result': 'Attempt to build HTTP'}
 host = ('localhost', 8888)
