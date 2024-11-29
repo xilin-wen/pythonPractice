@@ -1,7 +1,6 @@
 # json库用于字符串和 Python 数据结构之间的相互转换
 import json
 from datetime import time
-from encodings.utf_16 import encode
 
 from decoratorFunc.auth import route_handlers
 import jwt
@@ -21,7 +20,6 @@ def verify_token_func(self):
     try:
         # 移除"Bearer "前缀
         token = token.split(" ")[1]
-        print(token)
 
         # 解码token，验证过期时间
         decoded_token = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
@@ -48,11 +46,8 @@ def route_dispatcher_decorator(cls):
 
     # 定义新的 do_GET 方法
     def new_do_get(self):
-        print("route_handlers", route_handlers)
         path = self.path
-        print("path", path)
         handler = route_handlers.get(path, {}).get('GET')  # 查找对应 GET 方法的处理函数
-        print("handler", handler)
         is_verify_token = handler.get('token_required')
         is_verify_role = handler.get('role_required')
         handler_func = handler.get('func')
